@@ -2,12 +2,16 @@
 @comment{"===================================="}
 
 @declare{'genMethodCall'}
-@if{static}J@{ifaceSimpleName}@else{}j_@{ifaceName}@end{}.@{method.name}(
-	@code{pcnt=0;}
-	@foreach{param: method.params}
-		@code{argName='__args[' + (pcnt++) + ']';}
-		@includeNamed{'convParam'}
-	@end{", "})
+@if{method.native}
+	@{method.implementation}
+@else{}
+	@if{static}J@{ifaceSimpleName}@else{}j_@{ifaceName}@end{}.@{method.name}(
+		@code{pcnt=0;}
+		@foreach{param: method.params}
+			@code{argName='__args[' + (pcnt++) + ']';}
+			@includeNamed{'convParam'}
+		@end{", "})
+@end{}
 @end{}
 
 @comment{"Generate the code that converts a parameter from JavaScript to Java to call a Java API method"}
@@ -94,6 +98,8 @@ utils.convJsonToJS(@includeNamed{templ})
 @includeNamed{templ}
 	@else{method.returnType.kind == CLASS_API}
 new @{helper.getSimpleName(helper.getNonGenericType(returnType))}(@includeNamed{templ})
+	@else{method.native}
+@includeNamed{templ}
 	@else{}
 	@comment{'This will probably happen if the return type is generic'}
 utils.convRuntimeReturn(@includeNamed{templ})
@@ -200,7 +206,7 @@ utils.convRuntimeReturn(@includeNamed{templ})
 var utils = require('vertx-js/util/utils');\n
 @foreach{referencedType : referencedTypes}
 @code{refedType=referencedType.simpleName;}
-var @{refedType} = require('@{referencedType.moduleName}-js/@{helper.convertCamelCaseToUnderscores(refedType)}');\n
+var @{refedType} = require('@{referencedType.moduleName}-@{options.get('moduleSuffix')}/@{helper.convertCamelCaseToUnderscores(refedType)}');\n
 @end{}
 \n
 
